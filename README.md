@@ -1,0 +1,1 @@
+# Elektr-energiyasi-sarf-hisoblagichi
