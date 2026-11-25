@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f5f7fb">
+    <title>Energiya nazorati — Elektr sarfi kalkulyatori</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #17243b;
+            --muted: #78849a;
+            --line: #e9edf4;
+            --purple: #7657e8;
+            --purple-light: #f0edff;
+            --green: #159b72;
+            --orange: #e99835;
+            --surface: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-width: 320px;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--ink);
+            background:
+                radial-gradient(ellipse at 82% 0%, rgba(223, 218, 255, 0.6), transparent 30rem),
+                #f5f7fb;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        .app {
+            width: min(1120px, calc(100% - 48px));
+            margin: 0 auto;
+            padding: 32px 0 48px;
+        }
+
+        .topbar,
+        .brand,
+        .topbar-meta,
+        .section-heading,
+        .appliance-heading,
+        .input-heading,
+        .summary-title,
+        .summary-bottom,
+        .device-result,
+        .result-name,
+        .result-amount {
+            display: flex;
+            align-items: center;
+        }
+
+        .topbar,
+        .section-heading,
+        .appliance-heading,
+        .input-heading,
+        .summary-title,
+        .summary-bottom,
+        .device-result {
+            justify-content: space-between;
+        }
+
+        .topbar {
+            margin-bottom: 42px;
+        }
+
+        .brand {
+            gap: 12px;
+        }
+
+        .brand-mark {
+            display: grid;
+            width: 42px;
+            height: 42px;
+            place-items: center;
+            border-radius: 14px;
+            color: #fff;
+            background: linear-gradient(145deg, #9278f4, #6948dd);
+            box-shadow: 0 8px 18px rgba(118, 87, 232, 0.24);
+        }
+
+        .brand-name {
+            font-size: 15px;
+            font-weight: 750;
+            letter-spacing: -0.3px;
+        }
+
+        .brand-caption {
+            margin-top: 3px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .topbar-meta {
+            gap: 8px;
+            padding: 9px 13px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            color: #657187;
+            background: rgba(255, 255, 255, 0.76);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #35bd8e;
+            box-shadow: 0 0 0 3px #e4f7f0;
+        }
+
+        .intro {
+            max-width: 640px;
+            margin-bottom: 30px;
+        }
+
+        .eyebrow {
+            margin: 0 0 12px;
+            color: var(--purple);
+            font-size: 11px;
+            font-weight: 750;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(30px, 5vw, 43px);
+            font-weight: 760;
+            letter-spacing: -1.7px;
+            line-height: 1.12;
+        }
+
+        .intro-copy {
+            max-width: 510px;
+            margin: 13px 0 0;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.85fr);
+            align-items: start;
+            gap: 22px;
+        }
+
+        .panel,
+        .summary-card {
+            border: 1px solid rgba(228, 233, 242, 0.9);
+            border-radius: 20px;
+            background: var(--surface);
+            box-shadow: 0 12px 36px rgba(34, 48, 77, 0.045);
+        }
+
+        .panel {
+            padding: 24px;
+        }
+
+        .section-heading {
+            gap: 16px;
+            margin-bottom: 19px;
+        }
+
+        .section-title {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 720;
+            letter-spacing: -0.35px;
+        }
+
+        .section-caption {
+            margin: 5px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .device-count {
+            flex: 0 0 auto;
+            padding: 7px 10px;
+            border-radius: 9px;
+            color: #7161c5;
+            background: var(--purple-light);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .appliance-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .appliance {
+            padding: 16px;
+            border: 1px solid var(--line);
+            border-radius: 15px;
+            background: #fff;
+            transition: border-color 160ms ease, box-shadow 160ms ease;
+        }
+
+        .appliance:focus-within {
+            border-color: #c9bcff;
+            box-shadow: 0 0 0 3px rgba(118, 87, 232, 0.08);
+        }
+
+        .appliance-heading {
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .appliance-title-wrap {
+            display: flex;
+            min-width: 0;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .appliance-icon {
+            display: grid;
+            width: 36px;
+            height: 36px;
+            flex: 0 0 auto;
+            place-items: center;
+            border-radius: 11px;
+            color: #7259d8;
+            background: #f2efff;
+        }
+
+        .appliance-icon.mint {
+            color: #159b72;
+            background: #e9f8f2;
+        }
+
+        .appliance-icon.amber {
+            color: #c37d20;
+            background: #fff5e7;
+        }
+
+        .appliance-name {
+            width: min(100%, 220px);
+            min-width: 0;
+            padding: 4px 0;
+            border: 0;
+            outline: 0;
+            color: var(--ink);
+            background: transparent;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .appliance-name:focus {
+            box-shadow: 0 1px 0 var(--purple);
+        }
+
+        .device-result {
+            flex: 0 0 auto;
+            gap: 5px;
+            color: #818ba0;
+            font-size: 11px;
+        }
+
+        .device-result strong {
+            color: #4a3ab2;
+            font-size: 12px;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .input-heading {
+            margin-bottom: 7px;
+            color: #69758b;
+            font-size: 11px;
+            font-weight: 650;
+        }
+
+        .unit {
+            color: #929caf;
+            font-weight: 500;
+        }
+
+        .number-wrap {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #fafbfe;
+            transition: border-color 160ms ease, background 160ms ease;
+        }
+
+        .number-wrap:focus-within {
+            border-color: #aa99f8;
+            background: #fff;
+        }
+
+        .number-input {
+            width: 100%;
+            min-width: 0;
+            padding: 10px 11px;
+            border: 0;
+            outline: 0;
+            color: var(--ink);
+            background: transparent;
+            font-size: 14px;
+            font-weight: 650;
+        }
+
+        .number-input::placeholder {
+            color: #b6becc;
+            font-weight: 450;
+        }
+
+        .number-input::-webkit-outer-spin-button,
+        .number-input::-webkit-inner-spin-button {
+            margin: 0;
+            appearance: none;
+        }
+
+        .number-input[type="number"] {
+            appearance: textfield;
+        }
+
+        .formula {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin-top: 17px;
+            padding: 12px 13px;
+            border-radius: 11px;
+            color: #707d93;
+            background: #f8f7ff;
+            font-size: 11px;
+            line-height: 1.55;
+        }
+
+        .formula svg {
+            flex: 0 0 auto;
+            margin-top: 1px;
+            color: var(--purple);
+        }
+
+        .summary-card {
+            position: sticky;
+            top: 20px;
+            overflow: hidden;
+            padding: 22px;
+            color: #fff;
+            border: 0;
+            background: linear-gradient(150deg, #32246d 0%, #5140aa 55%, #745ee0 100%);
+            box-shadow: 0 18px 38px rgba(69, 53, 147, 0.2);
+        }
+
+        .summary-title {
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.76);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .summary-icon {
+            display: grid;
+            width: 35px;
+            height: 35px;
+            place-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 11px;
+            color: #e4ddff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .period-label {
+            padding: 6px 9px;
+            border: 1px solid rgba(255, 255, 255, 0.17);
+            border-radius: 999px;
+            color: rgba(255, 255, 255, 0.77);
+            font-size: 10px;
+        }
+
+        .total-label {
+            margin: 25px 0 4px;
+            color: rgba(255, 255, 255, 0.68);
+            font-size: 12px;
+        }
+
+        .total-value {
+            display: flex;
+            align-items: baseline;
+            gap: 7px;
+            margin: 0;
+            letter-spacing: -1px;
+        }
+
+        .total-number {
+            font-size: clamp(39px, 5vw, 48px);
+            font-weight: 760;
+            line-height: 1.15;
+        }
+
+        .total-unit {
+            color: rgba(255, 255, 255, 0.77);
+            font-size: 14px;
+            font-weight: 550;
+            letter-spacing: 0;
+        }
+
+        .summary-rule {
+            height: 1px;
+            margin: 20px 0;
+            border: 0;
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .summary-bottom {
+            gap: 12px;
+            margin-bottom: 14px;
+            color: rgba(255, 255, 255, 0.74);
+            font-size: 12px;
+        }
+
+        .summary-bottom strong {
+            color: #fff;
+            font-size: 13px;
+        }
+
+        .leader-box {
+            padding: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 13px;
+            background: rgba(255, 255, 255, 0.09);
+        }
+
+        .leader-label {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 9px;
+            color: rgba(255, 255, 255, 0.71);
+            font-size: 10px;
+            font-weight: 650;
+            letter-spacing: 0.55px;
+            text-transform: uppercase;
+        }
+
+        .leader-device {
+            overflow: hidden;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .leader-amount {
+            margin-top: 4px;
+            color: #d3cbff;
+            font-size: 12px;
+        }
+
+        .leader-empty {
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .comparison {
+            margin-top: 18px;
+        }
+
+        .comparison-heading {
+            margin: 0 0 13px;
+            color: rgba(255, 255, 255, 0.74);
+            font-size: 11px;
+            font-weight: 650;
+        }
+
+        .comparison-row + .comparison-row {
+            margin-top: 12px;
+        }
+
+        .comparison-label {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 6px;
+            color: rgba(255, 255, 255, 0.84);
+            font-size: 10px;
+        }
+
+        .comparison-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .comparison-value {
+            flex: 0 0 auto;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .bar-track {
+            height: 5px;
+            overflow: hidden;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.17);
+        }
+
+        .bar-fill {
+            width: 0;
+            height: 100%;
+            border-radius: inherit;
+            background: #c8baff;
+            transition: width 180ms ease;
+        }
+
+        .bar-fill.is-leader {
+            background: #ffc96c;
+        }
+
+        .footer-note {
+            margin: 13px 0 0;
+            color: rgba(255, 255, 255, 0.56);
+            font-size: 10px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 760px) {
+            .app {
+                width: min(600px, calc(100% - 32px));
+                padding-top: 22px;
+            }
+
+            .topbar {
+                margin-bottom: 34px;
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-card {
+                position: static;
+            }
+        }
+
+        @media (max-width: 460px) {
+            .app {
+                width: calc(100% - 24px);
+                padding-top: 18px;
+            }
+
+            .topbar-meta {
+                padding: 8px 10px;
+                font-size: 10px;
+            }
+
+            .brand {
+                gap: 8px;
+            }
+
+            .brand-mark {
+                width: 38px;
+                height: 38px;
+            }
+
+            .brand-name {
+                font-size: 13px;
+            }
+
+            .brand-caption {
+                font-size: 10px;
+            }
+
+            .panel {
+                padding: 18px 14px;
+            }
+
+            .appliance {
+                padding: 13px 11px;
+            }
+
+            .appliance-name {
+                font-size: 13px;
+            }
+
+            .device-result {
+                font-size: 10px;
+            }
+
+            .summary-card {
+                padding: 19px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="app">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true">
+                    <svg width="23" height="23" viewBox="0 0 24 24" fill="none">
+                        <path d="M13.2 2.8 5.7 13h5.2l-.2 8.2L18.3 11h-5.2l.1-8.2Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="brand-name">Energiya nazorati</div>
+                    <div class="brand-caption">Uy elektr sarfi kalkulyatori</div>
+                </div>
+            </div>
+            <div class="topbar-meta"><span class="status-dot" aria-hidden="true"></span> Hisob-kitob tayyor</div>
+        </header>
+
+        <section class="intro" aria-labelledby="page-title">
+            <p class="eyebrow">Aqlli uy · energiya hisobi</p>
+            <h1 id="page-title">Elektr sarfingizni<br>oson kuzating</h1>
+            <p class="intro-copy">Uchta jihozingiz quvvati va bir kunda ishlash vaqtini kiriting. Kunlik sarf darhol hisoblanadi.</p>
+        </section>
+
+        <div class="dashboard">
+            <section class="panel" aria-labelledby="devices-title">
+                <div class="section-heading">
+                    <div>
+                        <h2 class="section-title" id="devices-title">Jihozlaringiz</h2>
+                        <p class="section-caption">Quvvat va kunlik ishlash vaqtini kiriting</p>
+                    </div>
+                    <span class="device-count">3 ta jihoz</span>
+                </div>
+
+                <div class="appliance-list">
+                    <article class="appliance" data-appliance>
+                        <div class="appliance-heading">
+                            <div class="appliance-title-wrap">
+                                <span class="appliance-icon" aria-hidden="true">
+                                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
+                                        <rect x="5.5" y="3" width="13" height="18" rx="2.5" stroke="currentColor" stroke-width="1.6"/>
+                                        <path d="M6 8h12M9 5.5v.1M9 10.5v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                    </svg>
+                                </span>
+                                <input class="appliance-name" type="text" value="Muzlatgich" aria-label="1-jihoz nomi" maxlength="32">
+                            </div>
+                            <div class="device-result"><strong data-result>0</strong><span>kVt·soat/kun</span></div>
+                        </div>
+                        <div class="input-grid">
+                            <label>
+                                <span class="input-heading">Quvvati <span class="unit">· W</span></span>
+                                <span class="number-wrap"><input class="number-input" type="number" min="0" max="1000000" step="any" placeholder="Masalan, 150" value="150" inputmode="decimal" aria-label="Muzlatgich quvvati, vatt"></span>
+                            </label>
+                            <label>
+                                <span class="input-heading">Ishlash vaqti <span class="unit">· soat/kun</span></span>
+                                <span class="number-wrap"><input class="number-input" type="number" min="0" max="24" step="any" placeholder="Masalan, 8" value="24" inputmode="decimal" aria-label="Muzlatgich kunlik ishlash vaqti, soat"></span>
+                            </label>
+                        </div>
+                    </article>
+
+                    <article class="appliance" data-appliance>
+                        <div class="appliance-heading">
+                            <div class="appliance-title-wrap">
+                                <span class="appliance-icon mint" aria-hidden="true">
+                                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 3.5v2m0 13v2m8.5-8.5h-2m-13 0h-2m14.01-6.01-1.42 1.42m-9.18 9.18-1.42 1.42m12.02 0-1.42-1.42m-9.18-9.18L6.49 5.99M17 12a5 5 0 1 1-10 0 5 5 0 0 1 10 0Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                    </svg>
+                                </span>
+                                <input class="appliance-name" type="text" value="Konditsioner" aria-label="2-jihoz nomi" maxlength="32">
+                            </div>
+                            <div class="device-result"><strong data-result>0</strong><span>kVt·soat/kun</span></div>
+                        </div>
+                        <div class="input-grid">
+                            <label>
+                                <span class="input-heading">Quvvati <span class="unit">· W</span></span>
+                                <span class="number-wrap"><input class="number-input" type="number" min="0" max="1000000" step="any" placeholder="Masalan, 150" value="1200" inputmode="decimal" aria-label="Konditsioner quvvati, vatt"></span>
+                            </label>
+                            <label>
+                                <span class="input-heading">Ishlash vaqti <span class="unit">· soat/kun</span></span>
+                                <span class="number-wrap"><input class="number-input" type="number" min="0" max="24" step="any" placeholder="Masalan, 8" value="6" inputmode="decimal" aria-label="Konditsioner kunlik ishlash vaqti, soat"></span>
+                            </label>
+                        </div>
+                    </article>
+
+                    <article class="appliance" data-appliance>
+                        <div class="appliance-heading">
+                            <div class="appliance-title-wrap">
+                                <span class="appliance-icon amber" aria-hidden="true">
+                                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
+                                        <rect x="3" y="6" width="18" height="12" rx="3" stroke="currentColor" stroke-width="1.6"/>
+                                        <path d="m10 9 5 3-5 3V9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                <input class="appliance-name" type="text" value="Televizor" aria-label="3-jihoz nomi" maxlength="32">
+                            </div>
+                            <div class="device-result"><strong data-result>0</strong><span>kVt·soat/kun</span></div>
+                        </div>
+                        <div class="input-grid">
+                            <label>
+                                <span class="input-heading">Quvvati <span class="unit">· W</span></span>
+                                <span class="number-wrap"><input class="number-input" type="number" min="0" max="1000000" step="any" placeholder="Masalan, 150" value="100" inputmode="decimal" aria-label="Televizor quvvati, vatt"></span>
+                            </label>
+                            <label>
+                                <span class="input-heading">Ishlash vaqti <span class="unit">· soat/kun</span></span>
+                                <span class="number-wrap"><input class="number-input" type="number" min="0" max="24" step="any" placeholder="Masalan, 8" value="5" inputmode="decimal" aria-label="Televizor kunlik ishlash vaqti, soat"></span>
+                            </label>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="formula">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/>
+                        <path d="M12 11v5m0-8h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                    <span>Hisoblash: <strong>quvvat (W) × vaqt (soat) ÷ 1000 = kVt·soat/kun.</strong> Namunaviy qiymatlarni o‘zingiznikiga almashtiring.</span>
+                </div>
+            </section>
+
+            <aside class="summary-card" aria-labelledby="summary-heading" aria-live="polite">
+                <div class="summary-title">
+                    <span class="summary-icon" aria-hidden="true">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
+                            <path d="M13.2 2.8 5.7 13h5.2l-.2 8.2L18.3 11h-5.2l.1-8.2Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    <span id="summary-heading">Umumiy sarf</span>
+                    <span class="period-label">Kunlik</span>
+                </div>
+
+                <p class="total-label">Barcha jihozlar bo‘yicha</p>
+                <p class="total-value"><span class="total-number" id="total-consumption">0</span><span class="total-unit">kVt·soat</span></p>
+
+                <hr class="summary-rule">
+
+                <div class="summary-bottom"><span>Vatt-soat hisobida</span><strong id="total-watt-hours">0 W·soat</strong></div>
+
+                <div class="leader-box">
+                    <div class="leader-label">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                        </svg>
+                        Eng ko‘p sarflayotgan jihoz
+                    </div>
+                    <div id="leader-content" class="leader-empty">Hisoblash uchun sarf qiymatini kiriting.</div>
+                </div>
+
+                <div class="comparison">
+                    <h3 class="comparison-heading">Jihozlar taqqoslanishi</h3>
+                    <div id="comparison-list"></div>
+                </div>
+
+                <p class="footer-note">Hisob-kitob kiritilgan qiymatlar asosida taxminiy ko‘rsatkichni beradi.</p>
+            </aside>
+        </div>
+    </main>
+
+    <script>
+        const appliances = Array.from(document.querySelectorAll("[data-appliance]"));
+        const totalConsumption = document.getElementById("total-consumption");
+        const totalWattHours = document.getElementById("total-watt-hours");
+        const leaderContent = document.getElementById("leader-content");
+        const comparisonList = document.getElementById("comparison-list");
+        const numberFormat = new Intl.NumberFormat("uz-UZ", {
+            maximumFractionDigits: 3
+        });
+
+        function formatNumber(value) {
+            return numberFormat.format(value);
+        }
+
+        function updateConsumption() {
+            const results = appliances.map((appliance) => {
+                const inputs = appliance.querySelectorAll(".number-input");
+                const power = Number(inputs[0].value);
+                const hours = Number(inputs[1].value);
+                const isValid = inputs[0].value !== "" &&
+                    inputs[1].value !== "" &&
+                    Number.isFinite(power) &&
+                    Number.isFinite(hours) &&
+                    power >= 0 &&
+                    power <= 1000000 &&
+                    hours >= 0 &&
+                    hours <= 24;
+                const kilowattHours = isValid ? (power * hours) / 1000 : 0;
+                const nameInput = appliance.querySelector(".appliance-name");
+                const name = nameInput.value.trim() || nameInput.getAttribute("aria-label");
+
+                appliance.querySelector("[data-result]").textContent = formatNumber(kilowattHours);
+
+                return {
+                    appliance,
+                    name,
+                    kilowattHours,
+                    wattHours: kilowattHours * 1000
+                };
+            });
+
+            const totalKwh = results.reduce((sum, result) => sum + result.kilowattHours, 0);
+            const totalWh = totalKwh * 1000;
+            const highest = results.reduce((leader, result) =>
+                result.kilowattHours > (leader ? leader.kilowattHours : 0) ? result : leader, null);
+
+            totalConsumption.textContent = formatNumber(totalKwh);
+            totalWattHours.textContent = `${formatNumber(totalWh)} W·soat`;
+
+            if (highest && highest.kilowattHours > 0) {
+                leaderContent.className = "";
+                leaderContent.innerHTML = `<div class="leader-device"></div><div class="leader-amount"></div>`;
+                leaderContent.querySelector(".leader-device").textContent = highest.name;
+                leaderContent.querySelector(".leader-amount").textContent =
+                    `${formatNumber(highest.kilowattHours)} kVt·soat/kun`;
+            } else {
+                leaderContent.className = "leader-empty";
+                leaderContent.textContent = "Hozircha jihozlarda sarf yo‘q.";
+            }
+
+            comparisonList.replaceChildren();
+            results.forEach((result) => {
+                const row = document.createElement("div");
+                row.className = "comparison-row";
+
+                const label = document.createElement("div");
+                label.className = "comparison-label";
+
+                const name = document.createElement("span");
+                name.className = "comparison-name";
+                name.textContent = result.name;
+
+                const value = document.createElement("span");
+                value.className = "comparison-value";
+                value.textContent = `${formatNumber(result.kilowattHours)} kVt·soat`;
+
+                const track = document.createElement("div");
+                track.className = "bar-track";
+                track.setAttribute("aria-hidden", "true");
+
+                const fill = document.createElement("div");
+                fill.className = "bar-fill";
+                fill.style.width = totalKwh > 0
+                    ? `${(result.kilowattHours / totalKwh) * 100}%`
+                    : "0%";
+                if (highest && result === highest && highest.kilowattHours > 0) {
+                    fill.classList.add("is-leader");
+                }
+
+                label.append(name, value);
+                track.append(fill);
+                row.append(label, track);
+                comparisonList.append(row);
+            });
+        }
+
+        appliances.forEach((appliance) => {
+            appliance.querySelectorAll("input").forEach((input) => {
+                input.addEventListener("input", updateConsumption);
+            });
+        });
+
+        updateConsumption();
+    </script>
+</body>
+</html>
